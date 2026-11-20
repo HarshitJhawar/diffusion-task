@@ -2,42 +2,23 @@
 Guided sampling: steer a FROZEN base diffusion model with rules it never saw.
 
 Sample from  p*(x) ∝ p0(x) V(x),  where V(x) = V_A(x) V_B(x) (or any rules).
-In score form (Bayes, guide Part F.4), the score we would like at noise
-level t is
+In score form , the score we would like at noise level t is
     ∇ log p*_t(x_t) = ∇ log p0_t(x_t)  +  ∇ log V_t(x_t)
                       [base model]        [guidance: unknown]
 
-----------------------------------------------------
-We need to add s times the gradient at each reverse step. Adding s*g
-in raw form would make the total push depend on how many steps we take
-(1000 steps means 1000 pushes). Instead we add it the way a score enters a
-DDPM step. DDPM's mean can be written with the score s_theta = -eps/sqrt(1-abar):
-    mean = ( x_t + beta_t * s_theta ) / sqrt(alpha_t)          (guide Part E.13)
-so adding a correction g to the score adds  (beta_t / sqrt(alpha_t)) * g  to
-the mean. We therefore use
+We need to add s times the gradient at each reverse step. Adding s*g in raw form would make the total push depend on how many steps we take (1000 steps means 1000 pushes). Instead we add it the way a score enters a DDPM step. DDPM's mean can be written with the score s_theta = -eps/sqrt(1-abar):
+    mean = ( x_t + beta_t * s_theta ) / sqrt(alpha_t)          
+so adding a correction g to the score adds  (beta_t / sqrt(alpha_t)) * g  to the mean. We therefore use
     mean_guided = mean + s * (beta_t / sqrt(alpha_t)) * g.
-With this scaling, s = 1 is "plain Bayes": if the x0_hat approximation were
-exact, s = 1 would sample p* exactly. s > 1 over-weights the rules, which is
-like using V^s (Dhariwal Sec. 4.3). State this interpretation in the report:
-it is a choice.
 
-The one design switch: grad_through_denoiser (default True)
------------------------------------------------------------
-    True : g = ∇_{x_t} log V(x0_hat(x_t)), with the chain rule going back
-           THROUGH the network (autograd). This is the honest gradient of
-           what we wrote down, as in DPS. It knows that at high noise, moving
+The one design switch: grad_through_denoiser (default=True)
+    True : g = ∇_{x_t} log V(x0_hat(x_t)), It knows that at high noise, moving
            x_t barely moves x0_hat (the network mostly predicts the average
            of the data), so the push there is small.
     False: g = ∇ log V evaluated at x0_hat, applied to x_t directly, as if
            x0_hat moved one-for-one with x_t. No backward pass through the
            network: cheaper, but it ignores how x0_hat responds to x_t, so
            it may push too hard early on.
-The task asks "say whether your gradient passes through the denoiser, and
-why". Part B's design-choice experiment compares the two.
-
-The sampler draws random numbers in exactly the same order as the Part A
-sampler, so with s = 0 it reproduces diffusion.sample() for the same seed.
-The tests check this.
 """
 
 

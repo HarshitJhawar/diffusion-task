@@ -4,10 +4,7 @@ A small DDPM (Ho et al. 2020) for 2-D points.
 Formulation used (the task asks us to name it):
   - Discrete-time DDPM, variance-preserving, T steps, linear beta schedule.
   - The network predicts the noise epsilon (DDPM Eq. 11 / Eq. 14, "L_simple").
-  - Sampling: ancestral DDPM sampling (DDPM Algorithm 2), written in the
-    equivalent "blend of x_t and the clean-sample estimate x0_hat" form
-    (DDPM Eq. 7 with x0 replaced by x0_hat). This form makes x0_hat explicit
-    at every step, which is exactly where Part B's guidance will be taken.
+  - Sampling: ancestral DDPM sampling (DDPM Algorithm 2), written in the equivalent "blend of x_t and the clean-sample estimate x0_hat" form. This form makes x0_hat explicit at every step, which is exactly where Part B's guidance will be taken.
 
 Notation (same as the DDPM paper):
   beta_t       noise added at step t
