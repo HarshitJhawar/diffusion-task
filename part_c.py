@@ -1,31 +1,21 @@
 """
 Part C: after a rule changes, when is editing the guide enough?
 
-Rule A can live in two places and change in two ways: four cells.
-
     Where rule A lives            Before the change             Edit applied (no retraining)
-    ----------------------------  ----------------------------  ------------------------------
-    "guide": in a guide           full base model (all of p0)   swap guide A for guide A'
+    -------------------   ----------------------------  ------------------------------
+    "guide":                        full base model (all of p0)   swap guide A for guide A'
                                   + guides A and B              -> guides A' and B
-    "baked": baked into the base  base model trained only on    add a guide for A'
-             model                data with x1 > 0, + guide B   -> guides A' and B
+    "baked":                        base model trained only on    add a guide for A'
+                             data with x1 > 0, + guide B   -> guides A' and B
 
     Change      New rule A'      Soft score
     tighten     x1 > 1.3         sigmoid((x1 - 1.3) / 0.5)
     reverse     x1 < 0           sigmoid(-x1 / 0.5)
 
 In every cell the new exact target is  p0 * V_A'(x) * V_B(x)  (normalised).
-Note that in the "baked" cells the edited sampler is (baked model) + guides A'
-and B, which in effect also still contains the old rule A, through the data
-the model was trained on. That is what makes this question interesting.
 
 Commands:
-
-  python part_c.py train-baked   train the baked-in model with the Part A code,
-                                 training data filtered to x1 > 0
-  python part_c.py cells         fill the four cells (trains the baked model first
-                                 if its checkpoint is missing)
-  python part_c.py all           both in order
+  python part_c.py           trains the baked-in model, then fills the four cells. 
 """
 
 import argparse
@@ -209,23 +199,11 @@ def cells_figures(targets, samples, table, floors):
     plt.close(fig)
 
 
-
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("command", choices=["train-baked", "cells","all"])
-    ap.add_argument("--s", type=float, default=None, help="guidance scale (default: Part B's lowest-grid-distance s)")
-
+    ap.add_argument("--s", type=float, default=None,
+                    help="guidance scale (default: Part B's lowest-grid-distance s)")
     args = ap.parse_args()
-
-    if args.command == "train-baked":
-        train_baked()
-    elif args.command == "cells":
-        cells(choose_s(args.s))
-    
-    else:
-        s = choose_s(args.s)
-        if not BASE_BAKED_CKPT.exists():
-            train_baked()
-        cells(s)
+    cells(choose_s(args.s))
 

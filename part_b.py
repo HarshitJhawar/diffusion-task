@@ -4,21 +4,13 @@ Part B: how close does a FROZEN base model with two guides get to the exact targ
     Target   p*(x) ∝ p0(x) * V_A(x) * V_B(x)
              V_A(x) = sigmoid(x1 / 0.5)   "x1 > 0"
              V_B(x) = sigmoid(x2 / 0.5)   "x2 > 0"
-    Method   at each reverse step, add s times the gradient of
-             log V_A + log V_B, taken at the model's clean-sample estimate
-             x0_hat 
+    Method   at each reverse step, add s times the gradient of log V_A + log V_B, taken at the model's clean-sample estimate x0_hat 
 
   python part_b.py sweep
-      1. Computes the exact target twice: as a grid density, and as samples
-         by rejection. Checks the two agree, and measures the noise floor
-         for p* (20,000 rejection samples against the exact density).
-      2. Sweeps the guidance scale s over S_VALUES, 3 seeds each, with the
-         gradient passing through the denoiser.
-
+      1. Computes the exact target twice: as a grid density, and samples by rejection. Compare them and measures the noise floor for p*. 
+      2. Sweeps the guidance scale s over S_VALUES, 3 seeds each, with the gradient passing through the denoiser. 
   python part_b.py design
-      The design-choice experiment: gradient THROUGH the denoiser vs
-      SKIPPING it, at a few scales, 3 seeds each. Write your hypothesis
-      in HYPOTHESIS_B.md and commit it before running this.
+      The design-choice experiment: gradient THROUGH the denoiser vs SKIPPING it, at a few scales, 3 seeds each.
 """
 
 import argparse
