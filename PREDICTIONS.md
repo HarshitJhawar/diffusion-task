@@ -1,47 +1,26 @@
 # Part C predictions
 
-> Write this **before** any Part C run, then commit it:
-> `git add PREDICTIONS.md && git commit -m "Part C predictions"`
->
-> Write in your own words. Being wrong is fine; the task rewards predictions made before the results, and surprises that you then explain.
-
-## Setup I am predicting for
-
-- Guidance scale s used in all four cells: FILL IN (the Part B value you will use)
+- Guidance scale s used in all four cells:  (the Part B value you will use)
 - New exact target in every cell: p0 × V_A′ × V_B
-
-Useful numbers you can compute before running anything (they are exact, not results):
-
-- Where the 8 modes sit (angle, first coordinate, second coordinate): FILL IN
-- Which modes the new target keeps after "tighten", and roughly in what proportions: FILL IN
-- Which modes the new target keeps after "reverse": FILL IN
+- Reference from Part B at s = 1: grid 0.140, mode share 0.108 (noise floor for p*: grid 0.045, mode share 0.005)
 
 ## Cell predictions
 
-For each cell, predict:
-
-1. the grid distance relative to the noise floor: close to the floor, moderately above it, or far above it;
-2. which modes the samples will land in, compared with the exact shares;
-3. why.
-
 ### Guide / tighten (full model, guides A′ and B)
-
-FILL IN
+- Since the models are trained on all equally-weighted 8 Gaussian modes, the shares needed for target distribution will exist and be more on the upper-right corner. Guidance only has to reweight them toward the right-hand modes.
+- Modes: mostly 22.5°, then 67.5° and 337.5°, roughly matching the exact shares
 
 ### Guide / reverse (full model, guides A′ and B)
-
-FILL IN
+- Since, the models are trained on all Gaussian modes equally and is roughly symmetric, the model will have the mass the target needs and all the bumps will upper-left corner. 
+- Modes: mostly 112.5° and 157.5°. 
 
 ### Baked / tighten (model trained on x1 > 0 only, guides A′ and B)
-
-FILL IN
+- Since, the baked model is trained on a skewed distribution and knows only the right-hand modes, which match the shares needed for new target, the needed shares will be found. 
+- Modes: 22.5°, 67.5°, 337.5°; almost none at 112.5°.
 
 ### Baked / reverse (model trained on x1 > 0 only, guides A′ and B)
-
-FILL IN
+- Since, the baked model is trained on a skewed distributio and most of the mass is on the left, opposite to the ones needed for new target, the needed shares will NOT be found. Guidance pushes left at every step but model will pull samples back towards the modes it knows.  This is the worst cell by far. 
+- Modes: few samples in proper left-hand modes. 
 
 ## Overall
-
-- The cell I expect to be worst, and why: FILL IN
-- A result that would surprise me: FILL IN
-- My one-sentence guess at the answer to "when is editing the guide enough?": FILL IN
+- Worst cell: baked / reverse, because guidance can only reweight probability the base model
